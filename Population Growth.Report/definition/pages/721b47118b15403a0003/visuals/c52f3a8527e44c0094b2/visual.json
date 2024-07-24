@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "TEST 12",
+                    "value": "TEST 123",
                     "textStyle": {
                       "fontWeight": "bold",
                       "fontSize": "40pt"
