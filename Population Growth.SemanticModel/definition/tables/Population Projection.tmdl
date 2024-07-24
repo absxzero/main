@@ -1,0 +1,51 @@
+table 'Population Projection'
+	lineageTag: 06cc295d-54a3-4a6f-8fb3-400b3984f137
+
+	column Region
+		dataType: string
+		lineageTag: d1000cfe-af59-4b39-9679-1c3eaba460bf
+		summarizeBy: none
+		sourceColumn: Region
+
+		annotation SummarizationSetBy = Automatic
+
+	column '2022 (percent)'
+		dataType: string
+		lineageTag: c971c5c8-5f25-41d9-8426-71aa3a24e23a
+		summarizeBy: none
+		sourceColumn: 2022 (percent)
+
+		annotation SummarizationSetBy = Automatic
+
+	column '2030 (percent)'
+		dataType: string
+		lineageTag: 66b23db9-74a1-4f6d-b16c-6a60b8193767
+		summarizeBy: none
+		sourceColumn: 2030 (percent)
+
+		annotation SummarizationSetBy = Automatic
+
+	column '2050 (percent)'
+		dataType: string
+		lineageTag: 5c7922f5-fe3c-4890-b6c3-da15e09e008d
+		summarizeBy: none
+		sourceColumn: 2050 (percent)
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Population Projection' = m
+		mode: import
+		source =
+				let
+				    Source = Web.BrowserContents("https://en.wikipedia.org/wiki/World_population"),
+				    #"Extracted Table From Html" = Html.Table(Source, {{"Column1", "TABLE.wikitable:nth-child(49) > * > TR > :nth-child(1)"}, {"Column2", "TABLE.wikitable:nth-child(49) > * > TR > :nth-child(2)"}, {"Column3", "TABLE.wikitable:nth-child(49) > * > TR > :nth-child(3)"}, {"Column4", "TABLE.wikitable:nth-child(49) > * > TR > :nth-child(4)"}}, [RowSelector="TABLE.wikitable:nth-child(49) > * > TR"]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Extracted Table From Html",{{"Column1", type text}, {"Column2", type text}, {"Column3", type text}, {"Column4", type text}}),
+				    #"Promoted Headers" = Table.PromoteHeaders(#"Changed Type", [PromoteAllScalars=true]),
+				    #"Changed Type1" = Table.TransformColumnTypes(#"Promoted Headers",{{"Region", type text}, {"2022 (percent)", type text}, {"2030 (percent)", type text}, {"2050 (percent)", type text}})
+				in
+				    #"Changed Type1"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

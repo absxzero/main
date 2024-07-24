@@ -1,0 +1,63 @@
+table 'Global Population Growth'
+	lineageTag: 0b40d197-34f0-4d62-801c-d12bfa4d34c3
+
+	column Year
+		dataType: int64
+		formatString: 0
+		lineageTag: 3b4f68f5-028c-4c15-a575-f6174849d032
+		summarizeBy: sum
+		sourceColumn: Year
+
+		annotation SummarizationSetBy = Automatic
+
+	column Population
+		dataType: int64
+		formatString: 0
+		lineageTag: 33ffd198-c03a-4467-954d-afd69d7efedf
+		summarizeBy: sum
+		sourceColumn: Population
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Yearly (Percentage)'
+		dataType: string
+		lineageTag: fa7fc46b-f37f-4c7e-90a1-41111e9230b4
+		summarizeBy: none
+		sourceColumn: Yearly (Percentage)
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Yearly Growth'
+		dataType: string
+		lineageTag: 8137bbd6-a7bf-4edf-a955-489fab3bd50a
+		summarizeBy: none
+		sourceColumn: Yearly Growth
+
+		annotation SummarizationSetBy = Automatic
+
+	column Density(pop/km2)
+		dataType: int64
+		formatString: 0
+		lineageTag: aa7e762b-5030-425e-bb1c-c08477c013fd
+		summarizeBy: sum
+		sourceColumn: Density(pop/km2)
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Global Population Growth' = m
+		mode: import
+		source =
+				let
+				    Source = Web.BrowserContents("https://en.wikipedia.org/wiki/World_population"),
+				    #"Extracted Table From Html" = Html.Table(Source, {{"Column1", "TABLE.wikitable.sortable:nth-child(92) > * > TR > TH[rowspan=""2""]:not([colspan]):nth-child(1):nth-last-child(4), TABLE.wikitable.sortable:nth-child(92) > * > TR > TH:not([colspan]):not([rowspan]):nth-child(1):nth-last-child(5)"}, {"Column2", "TABLE.wikitable.sortable:nth-child(92) > * > TR > TH[rowspan=""2""]:not([colspan]):nth-child(1):nth-last-child(4) + TH[rowspan=""2""]:not([colspan]):nth-child(2):nth-last-child(3), TABLE.wikitable.sortable:nth-child(92) > * > TR > TH:not([colspan]):not([rowspan]):nth-child(1):nth-last-child(5) + TD:not([colspan]):not([rowspan]):nth-child(2):nth-last-child(4)"}, {"Column3", "TABLE.wikitable.sortable:nth-child(92) > * > TR > TH[rowspan=""2""]:not([colspan]):nth-child(1):nth-last-child(4) + TH[rowspan=""2""]:not([colspan]):nth-child(2):nth-last-child(3) + TH[colspan=""2""]:not([rowspan]):nth-child(3):nth-last-child(2), TABLE.wikitable.sortable:nth-child(92) > * > TR > TH:not([colspan]):not([rowspan]):nth-child(1):nth-last-child(2), TABLE.wikitable.sortable:nth-child(92) > * > TR > TH:not([colspan]):not([rowspan]):nth-child(1):nth-last-child(5) + TD:not([colspan]):not([rowspan]):nth-child(2):nth-last-child(4) + TD:not([colspan]):not([rowspan]):nth-child(3):nth-last-child(3)"}, {"Column4", "TABLE.wikitable.sortable:nth-child(92) > * > TR > TH[rowspan=""2""]:not([colspan]):nth-child(1):nth-last-child(4) + TH[rowspan=""2""]:not([colspan]):nth-child(2):nth-last-child(3) + TH[colspan=""2""]:not([rowspan]):nth-child(3):nth-last-child(2), TABLE.wikitable.sortable:nth-child(92) > * > TR > TH:not([colspan]):not([rowspan]):nth-child(1):nth-last-child(2) + TH:not([colspan]):not([rowspan]):nth-child(2):nth-last-child(1), TABLE.wikitable.sortable:nth-child(92) > * > TR > TH:not([colspan]):not([rowspan]):nth-child(1):nth-last-child(5) + TD:not([colspan]):not([rowspan]):nth-child(2):nth-last-child(4) + TD:not([colspan]):not([rowspan]):nth-child(3):nth-last-child(3) + TD:not([colspan]):not([rowspan]):nth-child(4):nth-last-child(2)"}, {"Column5", "TABLE.wikitable.sortable:nth-child(92) > * > TR > TH[rowspan=""2""]:not([colspan]):nth-child(1):nth-last-child(4) + TH[rowspan=""2""]:not([colspan]):nth-child(2):nth-last-child(3) + TH[colspan=""2""]:not([rowspan]):nth-child(3):nth-last-child(2) + TH[rowspan=""2""]:not([colspan]):nth-child(4):nth-last-child(1), TABLE.wikitable.sortable:nth-child(92) > * > TR > TH:not([colspan]):not([rowspan]):nth-child(1):nth-last-child(5) + TD:not([colspan]):not([rowspan]):nth-child(2):nth-last-child(4) + TD:not([colspan]):not([rowspan]):nth-child(3):nth-last-child(3) + TD:not([colspan]):not([rowspan]):nth-child(4):nth-last-child(2) + TD:not([colspan]):not([rowspan]):nth-child(5):nth-last-child(1)"}}, [RowSelector="TABLE.wikitable.sortable:nth-child(92) > * > TR"]),
+				    #"Promoted Headers" = Table.PromoteHeaders(#"Extracted Table From Html", [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"Year", Int64.Type}, {"Population", Int64.Type}, {"Yearly growth", type text}, {"Yearly growth_1", type text}, {"Density(pop/km2)", Int64.Type}}),
+				    #"Filtered Rows" = Table.SelectRows(#"Changed Type", each ([Year] <> null)),
+				    #"Renamed Columns" = Table.RenameColumns(#"Filtered Rows",{{"Yearly growth", "Yearly (Percentage)"}, {"Yearly growth_1", "Yearly Growth"}})
+				in
+				    #"Renamed Columns"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

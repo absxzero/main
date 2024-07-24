@@ -1,0 +1,70 @@
+table 'Population Ranking'
+	lineageTag: 9445b6ed-e91c-4db1-a494-a5d395698a2a
+
+	column Rank
+		dataType: int64
+		formatString: 0
+		lineageTag: 6690d89b-2be5-44d4-b90c-0169842e171e
+		summarizeBy: sum
+		sourceColumn: Rank
+
+		annotation SummarizationSetBy = Automatic
+
+	column Country
+		dataType: string
+		lineageTag: 57d1e263-9711-4551-a689-13f0381fa5e2
+		summarizeBy: none
+		sourceColumn: Country
+
+		annotation SummarizationSetBy = Automatic
+
+	column Population
+		dataType: int64
+		formatString: 0
+		lineageTag: 2b09ff93-fe1a-40e2-b6bd-f33b60e0badf
+		summarizeBy: sum
+		sourceColumn: Population
+
+		annotation SummarizationSetBy = Automatic
+
+	column Area(km2)
+		dataType: int64
+		formatString: 0
+		lineageTag: 44604ca3-ecf7-4664-a90c-f12af5d1fa9d
+		summarizeBy: sum
+		sourceColumn: Area(km2)
+
+		annotation SummarizationSetBy = Automatic
+
+	column Density(pop/km2)
+		dataType: int64
+		formatString: 0
+		lineageTag: f8f745bb-3da8-4b31-b80b-9015e52e2829
+		summarizeBy: sum
+		sourceColumn: Density(pop/km2)
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Population  trend[citation needed]'
+		dataType: string
+		lineageTag: a0146e9e-b0c4-41a7-87fb-90c0228747e0
+		summarizeBy: none
+		sourceColumn: Population  trend[citation needed]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Population Ranking' = m
+		mode: import
+		source =
+				let
+				    Source = Web.BrowserContents("https://en.wikipedia.org/wiki/World_population"),
+				    #"Extracted Table From Html" = Html.Table(Source, {{"Column1", "TABLE.wikitable.sortable:nth-child(75) > * > TR > :nth-child(1)"}, {"Column2", "TABLE.wikitable.sortable:nth-child(75) > * > TR > :nth-child(2)"}, {"Column3", "TABLE.wikitable.sortable:nth-child(75) > * > TR > :nth-child(3)"}, {"Column4", "TABLE.wikitable.sortable:nth-child(75) > * > TR > :nth-child(4)"}, {"Column5", "TABLE.wikitable.sortable:nth-child(75) > * > TR > :nth-child(5)"}, {"Column6", "TABLE.wikitable.sortable:nth-child(75) > * > TR > :nth-child(6)"}}, [RowSelector="TABLE.wikitable.sortable:nth-child(75) > * > TR"]),
+				    #"Promoted Headers" = Table.PromoteHeaders(#"Extracted Table From Html", [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"Rank", Int64.Type}, {"Country", type text}, {"Population", Int64.Type}, {"Area(km2)", Int64.Type}, {"Density(pop/km2)", Int64.Type}, {"Population  trend[citation needed]", type text}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
